@@ -5,13 +5,13 @@ use diesel::{AsChangeset, Identifiable, Insertable, QueryDsl, Queryable, RunQuer
 use std::error::Error;
 
 #[derive(Queryable, Selectable, Identifiable, AsChangeset, Debug)]
-struct User {
-    id: i32,
-    name: String,
+pub struct User {
+    pub id: i32,
+    pub name: String,
 }
 
 impl User {
-    fn get_all() -> Result<Vec<User>, Box<dyn Error>> {
+    pub fn get_all() -> Result<Vec<User>, Box<dyn Error>> {
         use crate::schema::users::dsl::*;
 
         let mut conn = connect_db()?;
@@ -19,7 +19,7 @@ impl User {
         Ok(users.load::<User>(&mut conn)?)
     }
 
-    fn get_by_name(u_name: &str) -> Result<Option<User>, Box<dyn Error>> {
+    pub fn get_by_name(u_name: &str) -> Result<Option<User>, Box<dyn Error>> {
         use crate::schema::users::dsl::*;
 
         let mut conn = connect_db()?;
@@ -35,7 +35,7 @@ impl User {
         }
     }
 
-    fn get_by_id(u_id: i32) -> Result<Option<User>, Box<dyn Error>> {
+    pub fn get_by_id(u_id: i32) -> Result<Option<User>, Box<dyn Error>> {
         use crate::schema::users::dsl::*;
 
         let mut conn = connect_db()?;
@@ -51,7 +51,7 @@ impl User {
         }
     }
 
-    fn update(&self) -> Result<(), Box<dyn Error>> {
+    pub fn update(&self) -> Result<(), Box<dyn Error>> {
         let mut conn = connect_db()?;
 
         diesel::update(&self).set(self).execute(&mut conn)?;
@@ -59,7 +59,7 @@ impl User {
         Ok(())
     }
 
-    fn delete(self) -> Result<(), Box<dyn Error>> {
+    pub fn delete(self) -> Result<(), Box<dyn Error>> {
         let mut conn = connect_db()?;
 
         diesel::delete(&self).execute(&mut conn)?;
@@ -87,13 +87,13 @@ impl NewUser {
 }
 
 #[cfg(test)]
-mod test {
+pub mod test {
     use super::*;
+    use crate::models::test::test_connect_db;
+    use rstest::*;
 
-    #[test]
-    fn test_user() -> Result<(), Box<dyn Error>> {
-        assert!(connect_db().is_ok());
-
+    #[rstest]
+    fn test_user(_test_connect_db: PgConnection) -> Result<(), Box<dyn Error>> {
         let name = "012345678901234567890123456789012345678901234567890123456789";
         let new_name = "111111111111111111111111111111111111111111111111111111111111";
 
@@ -117,5 +117,36 @@ mod test {
         assert!(User::get_by_name(new_name)?.unwrap().delete().is_ok());
 
         Ok(())
+    }
+
+    #[fixture]
+    pub fn create_sample_users() -> Vec<User> {
+        use rand::Rng;
+        use rnglib::{Language, RNG};
+
+        let rng = RNG::new(&Language::Roman).unwrap();
+
+        let mut res: Vec<User> = Vec::new();
+
+        for _ in 0..2 {
+            let name = format!(
+                "{}-{}-{}",
+                rng.generate_name(),
+                rng.generate_name(),
+                rand::thread_rng().gen_range(0..100)
+            );
+
+            let u1 = NewUser { name: name.clone() };
+
+            u1.save().unwrap();
+
+            if let Ok(Some(u)) = User::get_by_name(&u1.name) {
+                res.push(u);
+            } else {
+                panic!("Unable to add users sample users to db...")
+            }
+        }
+
+        return res;
     }
 }

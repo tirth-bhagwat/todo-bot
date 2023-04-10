@@ -1,8 +1,25 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    users (id) {
+    todos (id) {
         id -> Int4,
-        name -> Varchar,
+        title -> Text,
+        description -> Nullable<Text>,
+        user_id -> Int4,
+        status -> Int4,
     }
 }
+
+diesel::table! {
+    users (id) {
+        id -> Int4,
+        name -> Text,
+    }
+}
+
+diesel::joinable!(todos -> users (user_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    todos,
+    users,
+);
