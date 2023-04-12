@@ -1,6 +1,8 @@
+mod bot;
 mod models;
 mod schema;
 
-fn main() {
-    println!("Hello, world!");
+#[tokio::main]
+async fn main() {
+    bot::start().await;
 }
