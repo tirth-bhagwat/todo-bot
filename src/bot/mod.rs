@@ -1,7 +1,10 @@
 mod main_menu;
 mod onboarding;
 
-use teloxide::{dispatching::{dialogue::InMemStorage, HandlerExt}, prelude::*};
+use teloxide::{
+    dispatching::{dialogue::InMemStorage, HandlerExt},
+    prelude::*,
+};
 
 use self::{main_menu::MainMenu, onboarding::OnBoarding};
 

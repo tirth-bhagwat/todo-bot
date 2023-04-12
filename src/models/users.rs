@@ -8,6 +8,7 @@ use std::error::Error;
 pub struct User {
     pub id: i32,
     pub name: String,
+    pub telegram_id: String,
 }
 
 impl User {

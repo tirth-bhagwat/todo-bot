@@ -14,6 +14,7 @@ diesel::table! {
     users (id) {
         id -> Int4,
         name -> Text,
+        telegram_id -> Text,
     }
 }
 
