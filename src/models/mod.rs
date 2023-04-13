@@ -1,25 +1,39 @@
-use std::{env, error::Error};
-
-use diesel::{Connection, PgConnection};
-
 pub mod todos;
 pub mod users;
 
-fn connect_db() -> Result<PgConnection, Box<dyn Error>> {
+use std::{env, error::Error};
+
+use diesel_async::{AsyncConnection, AsyncPgConnection};
+
+use diesel::result::Error::{DatabaseError, NotFound};
+
+pub enum DbError {
+    NotFound,
+    Other,
+}
+
+pub async fn connect_db() -> Result<AsyncPgConnection, Box<dyn Error>> {
     dotenvy::dotenv().ok();
     let database_url = env::var("DATABASE_URL")?;
 
-    Ok(PgConnection::establish(&database_url)?)
+    Ok(AsyncPgConnection::establish(&database_url).await?)
+}
+
+fn fmt_error(err: diesel::result::Error) -> DbError {
+    match err {
+        NotFound => DbError::NotFound,
+        _ => DbError::Other,
+    }
 }
 
 #[cfg(test)]
 pub mod test {
-    use diesel::PgConnection;
+    use diesel_async::AsyncPgConnection;
     use rstest::*;
 
     #[fixture]
-    pub fn test_connect_db() -> PgConnection {
-        match super::connect_db() {
+    pub async fn test_connect_db() -> AsyncPgConnection {
+        match super::connect_db().await {
             Ok(conn) => conn,
             Err(err) => {
                 dbg!(err);

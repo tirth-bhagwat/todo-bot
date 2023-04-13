@@ -2,6 +2,8 @@ use teloxide::{requests::Requester, types::Message, Bot};
 
 use super::{HandlerResult, MainMenu, MyDialogue};
 
+use crate::models::users::NewUser;
+
 #[derive(Clone, Default, Debug)]
 pub enum OnBoarding {
     #[default]
@@ -26,6 +28,14 @@ impl OnBoarding {
                             format!("Hello, {}!\n Welcome aboard!", text),
                         )
                         .await?;
+
+                        let user = NewUser {
+                            name: text.to_string(),
+                            telegram_id: msg.chat.id.to_string(),
+                        };
+
+                        user.save().await.unwrap();
+
                         dialogue.exit().await?;
                     } else {
                         bot.send_message(msg.chat.id, "Invalid name ...").await?;
