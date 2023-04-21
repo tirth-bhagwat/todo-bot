@@ -7,9 +7,8 @@ use std::error::Error;
 
 #[derive(Queryable, Selectable, Identifiable, AsChangeset, Debug)]
 pub struct User {
-    pub id: i32,
+    pub id: String,
     pub name: String,
-    pub telegram_id: String,
 }
 
 impl User {
@@ -37,7 +36,7 @@ impl User {
         }
     }
 
-    pub async fn get_by_id(u_id: i32) -> Result<Option<User>, Box<dyn Error>> {
+    pub async fn get_by_id(u_id: &str) -> Result<Option<User>, Box<dyn Error>> {
         use crate::schema::users::dsl::*;
 
         let mut conn = connect_db().await?;
@@ -53,25 +52,25 @@ impl User {
         }
     }
 
-    pub async fn get_by_tele_id(u_id: &str) -> Result<Option<User>, Box<dyn Error>> {
-        use crate::schema::users::dsl::*;
+    // pub async fn get_by_tele_id(u_id: &str) -> Result<Option<User>, Box<dyn Error>> {
+    //     use crate::schema::users::dsl::*;
 
-        let mut conn = connect_db().await?;
+    //     let mut conn = connect_db().await?;
 
-        match users
-            .filter(telegram_id.eq(u_id))
-            .first::<User>(&mut conn)
-            .await
-        {
-            Ok(x) => Ok(Some(x)),
-            Err(err) => match err {
-                diesel::result::Error::NotFound => {
-                    return Ok(None);
-                }
-                _ => return Err(err.into()),
-            },
-        }
-    }
+    //     match users
+    //         .filter(telegram_id.eq(u_id))
+    //         .first::<User>(&mut conn)
+    //         .await
+    //     {
+    //         Ok(x) => Ok(Some(x)),
+    //         Err(err) => match err {
+    //             diesel::result::Error::NotFound => {
+    //                 return Ok(None);
+    //             }
+    //             _ => return Err(err.into()),
+    //         },
+    //     }
+    // }
 
     pub async fn update(&self) -> Result<(), Box<dyn Error>> {
         let mut conn = connect_db().await?;
@@ -93,8 +92,8 @@ impl User {
 #[derive(Insertable, Debug)]
 #[table_name = "users"]
 pub struct NewUser {
+    pub id: String,
     pub name: String,
-    pub telegram_id: String,
 }
 
 impl NewUser {
@@ -131,8 +130,8 @@ pub mod test {
 
         // create a new user
         let u1 = NewUser {
+            id: "123456789".to_owned(),
             name: name.to_owned(),
-            telegram_id: "123456789".to_owned(),
         };
 
         // save the user
@@ -175,12 +174,12 @@ pub mod test {
             );
 
             let u1 = NewUser {
-                name: name.clone(),
-                telegram_id: format!(
+                id: format!(
                     "{}{}",
                     rand::thread_rng().gen_range(100..999),
                     rand::thread_rng().gen_range(1000..9999)
                 ),
+                name: name.clone(),
             };
 
             u1.save().await.unwrap();

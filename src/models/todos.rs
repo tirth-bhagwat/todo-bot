@@ -14,7 +14,7 @@ pub struct Todo {
     pub id: i32,
     pub title: String,
     pub description: Option<String>,
-    pub user_id: i32,
+    pub user_id: String,
     pub status: i32,
 }
 
@@ -30,7 +30,7 @@ impl Todo {
             .await?)
     }
 
-    pub async fn get_for_user(u_id: i32) -> Result<Vec<(Todo, User)>, Box<dyn Error>> {
+    pub async fn get_for_user(u_id: &str) -> Result<Vec<(Todo, User)>, Box<dyn Error>> {
         use crate::schema::users;
 
         let mut conn = connect_db().await?;
@@ -72,11 +72,11 @@ impl Todo {
 
 #[derive(Insertable)]
 #[table_name = "todos"]
-struct NewTodo {
-    title: String,
-    description: Option<String>,
-    user_id: i32,
-    status: i32,
+pub struct NewTodo {
+    pub title: String,
+    pub description: Option<String>,
+    pub user_id: String,
+    pub status: i32,
 }
 
 impl NewTodo {
@@ -112,7 +112,7 @@ mod test {
         let t1 = NewTodo {
             title: "Todo 12332112311233211231".to_owned(),
             description: Some("Description for todo 12332112311233211231".to_owned()),
-            user_id: sample_users.get(0).unwrap().id,
+            user_id: sample_users.get(0).unwrap().id.to_string(),
             status: 0,
         };
 

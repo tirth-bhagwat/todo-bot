@@ -5,16 +5,15 @@ diesel::table! {
         id -> Int4,
         title -> Text,
         description -> Nullable<Text>,
-        user_id -> Int4,
+        user_id -> Text,
         status -> Int4,
     }
 }
 
 diesel::table! {
     users (id) {
-        id -> Int4,
+        id -> Text,
         name -> Text,
-        telegram_id -> Text,
     }
 }
 
