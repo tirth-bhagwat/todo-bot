@@ -1,12 +1,12 @@
+mod formatters;
 mod main_menu;
 mod onboarding;
 mod todo_creation;
 
+use core::fmt;
+
 use teloxide::{
-    dispatching::{
-        dialogue::{self, InMemStorage},
-        HandlerExt,
-    },
+    dispatching::{dialogue::InMemStorage, HandlerExt},
     prelude::*,
     utils::command::BotCommands,
 };
@@ -29,6 +29,17 @@ enum Command {
     Help,
 }
 
+impl fmt::Display for Command {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Command::Start => write!(f, "/start"),
+            Command::New => write!(f, "/new"),
+            Command::View => write!(f, "/view"),
+            Command::Help => write!(f, "/help"),
+        }
+    }
+}
+
 pub async fn start() {
     dotenvy::dotenv().ok();
     let token = dotenvy::var("TELOXIDE_TOKEN").unwrap();
@@ -40,7 +51,7 @@ pub async fn start() {
             .enter_dialogue::<Message, InMemStorage<UserState>, UserState>()
             .branch(
                 dptree::case![UserState::Idle]
-                    .filter_command::<Command>()
+                    .filter(|msg: Message| match_commands(msg))
                     .endpoint(UserState::init),
             )
             .branch(dptree::case![UserState::Welcome(x)].endpoint(OnBoarding::handle))
@@ -54,11 +65,23 @@ pub async fn start() {
     .await;
 }
 
-async fn help(bot: Bot, upd: Update, msg: Message) -> HandlerResult {
+async fn help(bot: Bot, _: Update, msg: Message) -> HandlerResult {
     bot.send_message(msg.chat.id, Command::descriptions().to_string())
         .await
         .unwrap();
     Ok(())
+}
+
+fn match_commands(inp: Message) -> bool {
+    if let Some(msg) = inp.text() {
+        let msg = msg.trim().to_lowercase();
+        for cmd in vec![Command::New, Command::View, Command::Start, Command::Help] {
+            if msg.starts_with(&cmd.to_string()) || msg.starts_with(&cmd.to_string()[1..]) {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 #[cfg(test)]
