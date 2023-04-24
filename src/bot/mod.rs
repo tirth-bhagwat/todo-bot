@@ -8,6 +8,8 @@ use core::fmt;
 use teloxide::{
     dispatching::{dialogue::InMemStorage, HandlerExt},
     prelude::*,
+    types::ParseMode::MarkdownV2,
+    // update_listeners::webhooks,
     utils::command::BotCommands,
 };
 
@@ -45,6 +47,20 @@ pub async fn start() {
     let token = dotenvy::var("TELOXIDE_TOKEN").unwrap();
     let bot = Bot::new(token);
 
+    // bot.send_message("90", "Bot started")
+    //     .parse_mode(MarkdownV2)
+    //     .send()
+    //     .await
+    //     .unwrap();
+
+    // bot.send_message(user_id, text)
+    // .parse_mode(MarkdownV2)
+    // .disable_web_page_preview(true)
+    // .disable_notification(silent)
+    // .send()
+    // .await
+    // .map(|_| ())
+
     Dispatcher::builder(
         bot,
         Update::filter_message()
@@ -67,8 +83,8 @@ pub async fn start() {
 
 async fn help(bot: Bot, _: Update, msg: Message) -> HandlerResult {
     bot.send_message(msg.chat.id, Command::descriptions().to_string())
-        .await
-        .unwrap();
+        .send()
+        .await?;
     Ok(())
 }
 

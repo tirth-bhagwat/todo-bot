@@ -9,13 +9,21 @@ services:
       POSTGRES_DB: todo-db
     ports:
       - "6543:5432"
+    networks:
+      - bot-netw
+    expose:
+      - "5432"
 
-  # pgadmin:
-  #   image: dpage/pgadmin4:latest
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: "admin@vs.code"
-  #     PGADMIN_DEFAULT_PASSWORD: "admin"
-  #     PGADMIN_DISABLE_POSTFIX: "true"
-  #     PGADMIN_LISTEN_PORT: "8080"
-  #   ports:
-      # - "8080:8080"
+  todo-bot:
+    image: todo-bot:latest
+    networks:
+      - bot-netw
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://postgres:admin@db:5432/todo-db
+      - TELOXIDE_TOKEN=6043871025:AAEZkYQutC1pO56V0pCEDhRVw7Ch8O6KxtI
+
+networks:
+  bot-netw:
+    driver: bridge

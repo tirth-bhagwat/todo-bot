@@ -1,5 +1,6 @@
 use teloxide::{
-    requests::{Requester, RequesterExt},
+    payloads::SendMessageSetters,
+    requests::{Request, Requester, RequesterExt},
     types::{Message, ParseMode::MarkdownV2},
     Bot,
 };
@@ -49,9 +50,11 @@ impl UserState {
                         .collect::<Vec<Todo>>(),
                     Err(_) => panic!(),
                 };
-                let mut x = bot.send_message(msg.chat.id, format_todos(todos));
-                x.parse_mode = Some(MarkdownV2);
-                x.await?;
+
+                bot.send_message(msg.chat.id, format_todos(todos))
+                    .parse_mode(MarkdownV2)
+                    .send()
+                    .await?;
             }
         }
 
@@ -61,7 +64,12 @@ impl UserState {
 
 fn match_command(msg: &Message, command: &str) -> bool {
     if let Some(text) = msg.text() {
-        if text.trim().to_lowercase().starts_with(command) || text.trim().to_lowercase().starts_with(&command[1..].to_string()) {
+        if text.trim().to_lowercase().starts_with(command)
+            || text
+                .trim()
+                .to_lowercase()
+                .starts_with(&command[1..].to_string())
+        {
             return true;
         }
     }

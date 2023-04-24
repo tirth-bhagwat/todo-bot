@@ -1,4 +1,4 @@
-use teloxide::{requests::Requester, types::Message, Bot};
+use teloxide::{requests::Requester, types::Message, utils::markdown::escape, Bot};
 
 use super::{HandlerResult, MyDialogue, UserState};
 
@@ -28,7 +28,7 @@ impl TodoReader {
                     if let Some(t) = msg.text() {
                         bot.send_message(msg.chat.id, "Enter description").await?;
                         dialogue
-                            .update(UserState::New(TodoReader::Description(t.to_owned())))
+                            .update(UserState::New(TodoReader::Description(escape(t))))
                             .await?;
                     } else {
                         bot.send_message(msg.chat.id, "Enter title").await?;
@@ -43,7 +43,7 @@ impl TodoReader {
                         .await?;
                         let todo = NewTodo {
                             title: t,
-                            description: Some(d.to_string()),
+                            description: Some(escape(d)),
                             user_id: msg.chat.id.to_string(),
                             status: 0,
                         };

@@ -11,7 +11,7 @@ use super::users::User;
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = todos)]
 pub struct Todo {
-    pub id: i32,    
+    pub id: i32,
     pub title: String,
     pub description: Option<String>,
     pub user_id: String,
