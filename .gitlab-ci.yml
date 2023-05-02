@@ -6,6 +6,7 @@ deploy:
     - ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$SSH_HOST "
       cd "~/todo-bot-prod" &&
       git pull &&
+      git pull https://$GITLAB_USER_LOGIN:$PROD_REPO_ACCESS_TOKEN@gitlab.com/tirth-bhagwat/todo-bot-prod
       docker login -u $GHCR_USER -p $GHCR_PASSWORD ghcr.io &&
       docker pull ghcr.io/tirth-bhagwat/todo-bot:latest &&
       docker compose up -d"
