@@ -1,5 +1,5 @@
 deploy:
-  image: ubuntu:22.04
+  # image: ubuntu:22.04
   before_script:
     - chmod 400 $SSH_KEY
   script:
