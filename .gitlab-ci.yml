@@ -6,6 +6,6 @@ deploy:
     - ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$SSH_HOST "
       cd "~/todo-bot-prod" &&
       git pull &&
-      docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-      docker pull gitlab.com/tirth-bhagwat/todo-bot:latest &&
+      docker login -u $GHCR_USER -p $GHCR_PASSWORD $GHCR_URL &&
+      docker pull ghcr.io/tirth-bhagwat/todo-bot:latest &&
       docker compose up -d"
