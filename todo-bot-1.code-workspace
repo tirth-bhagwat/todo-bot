@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../todo-bot-prod"
+		}
+	],
+    "settings": {
+        "rust-analyzer.linkedProjects": [
+            "./Cargo.toml"
+        ]
+    }
+}

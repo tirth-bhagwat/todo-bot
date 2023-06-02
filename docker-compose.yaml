@@ -8,11 +8,13 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: todo-db
     ports:
-      - "6543:5432"
+      - "5430:5432"
     networks:
       - bot-netw
     expose:
       - "5432"
+    volumes:
+      - /home/ubuntu/Projects/todo-bot-1/db_data/prod/data:/var/lib/postgresql/data
 
   todo-bot:
     image: todo-bot:latest
@@ -21,8 +23,8 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgres://postgres:admin@db:5432/todo-db
-      - TELOXIDE_TOKEN=6043871025:AAEZkYQutC1pO56V0pCEDhRVw7Ch8O6KxtI
+      - DATABASE_URL=${DATABASE_URL}
+      - TELOXIDE_TOKEN=${TELOXIDE_TOKEN}
 
 networks:
   bot-netw:

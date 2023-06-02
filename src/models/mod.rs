@@ -13,8 +13,8 @@ pub enum DbError {
 }
 
 pub async fn connect_db() -> Result<AsyncPgConnection, Box<dyn Error>> {
-    dotenvy::dotenv().ok();
-    let database_url = env::var("DATABASE_URL")?;
+    
+    let database_url = env::var("DEV_DATABASE_URL")?;
 
     Ok(AsyncPgConnection::establish(&database_url).await?)
 }

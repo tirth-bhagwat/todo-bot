@@ -1,6 +1,7 @@
 # Files
 .gitignore
 Cargo.lock
+# *.env
 # Folders
 .git
 .vscode

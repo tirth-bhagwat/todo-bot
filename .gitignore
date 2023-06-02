@@ -7,4 +7,5 @@
 
 # User generated
 .vscode
-.env
+*.env
+db_data

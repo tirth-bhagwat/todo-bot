@@ -1,4 +1,4 @@
-use teloxide::{requests::Requester, types::Message, Bot};
+use teloxide::{requests::Requester, types::Message, utils::markdown::escape, Bot};
 
 use super::{HandlerResult, MyDialogue, UserState};
 
@@ -12,7 +12,7 @@ pub enum OnBoarding {
 }
 
 impl OnBoarding {
-    pub async fn start(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
+    pub(super) async fn start(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
         let user = User::get_by_id(&msg.chat.id.to_string())
             .await
             .unwrap_or_else(|_| None);
@@ -50,7 +50,7 @@ impl OnBoarding {
 
                         let user = NewUser {
                             id: msg.chat.id.to_string(),
-                            name: text.to_string(),
+                            name: escape(text),
                         };
 
                         user.save().await.unwrap();

@@ -2,18 +2,19 @@ mod formatters;
 mod main_menu;
 mod onboarding;
 mod todo_creation;
+mod utlities;
 
 use core::fmt;
+use futures::future::BoxFuture;
 
 use teloxide::{
     dispatching::{dialogue::InMemStorage, HandlerExt},
     prelude::*,
-    types::ParseMode::MarkdownV2,
-    // update_listeners::webhooks,
     utils::command::BotCommands,
 };
 
 use self::{main_menu::UserState, onboarding::OnBoarding, todo_creation::TodoReader};
+use utlities::is_valid_command;
 
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 type MyDialogue = Dialogue<UserState, InMemStorage<UserState>>;
@@ -42,10 +43,39 @@ impl fmt::Display for Command {
     }
 }
 
+impl Command {
+    pub fn get_handler(
+        self,
+    ) -> Option<
+        Box<
+            dyn Fn(
+                Bot,
+                MyDialogue,
+                Message,
+            )
+                -> BoxFuture<'static, Result<(), Box<dyn std::error::Error + Send + Sync>>>,
+        >,
+    > {
+        match self {
+            Command::Start => Some(Box::new(|bot, dialogue, msg| {
+                Box::pin(OnBoarding::handle(bot, dialogue, msg))
+            })),
+
+            Command::New => Some(Box::new(|bot, dialogue, msg| {
+                Box::pin(TodoReader::handle(bot, dialogue, msg))
+            })),
+
+            _ => None,
+        }
+    }
+}
+
 pub async fn start() {
     dotenvy::dotenv().ok();
     let token = dotenvy::var("TELOXIDE_TOKEN").unwrap();
     let bot = Bot::new(token);
+
+    // let x = OnBoarding::handle;
 
     // bot.send_message("90", "Bot started")
     //     .parse_mode(MarkdownV2)
@@ -67,7 +97,7 @@ pub async fn start() {
             .enter_dialogue::<Message, InMemStorage<UserState>, UserState>()
             .branch(
                 dptree::case![UserState::Idle]
-                    .filter(|msg: Message| match_commands(msg))
+                    .filter(|msg: Message| is_valid_command(&msg).is_some())
                     .endpoint(UserState::init),
             )
             .branch(dptree::case![UserState::Welcome(x)].endpoint(OnBoarding::handle))
@@ -86,18 +116,6 @@ async fn help(bot: Bot, _: Update, msg: Message) -> HandlerResult {
         .send()
         .await?;
     Ok(())
-}
-
-fn match_commands(inp: Message) -> bool {
-    if let Some(msg) = inp.text() {
-        let msg = msg.trim().to_lowercase();
-        for cmd in vec![Command::New, Command::View, Command::Start, Command::Help] {
-            if msg.starts_with(&cmd.to_string()) || msg.starts_with(&cmd.to_string()[1..]) {
-                return true;
-            }
-        }
-    }
-    false
 }
 
 #[cfg(test)]

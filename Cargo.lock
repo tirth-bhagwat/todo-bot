@@ -2134,6 +2134,7 @@ dependencies = [
  "diesel",
  "diesel-async",
  "dotenvy",
+ "futures",
  "rand",
  "random_name_generator",
  "rstest",
